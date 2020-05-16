@@ -10,17 +10,12 @@ function hideVideoControls() {
   videoControls.classList.remove("visible");
 }
 
-videoControls.addEventListener("click", function (event) {
-  if (videoControls.classList.contains("visible")) {
-    hideVideoControls();
-  } else {
-    showVideoControls();
-  }
+videoControls.addEventListener("click", (event) => {
+  if (videoControls.classList.contains("visible")) hideVideoControls();
+  else showVideoControls();
 });
 
-document.addEventListener("DOMContentLoaded", function () {
-  showVideoControls();
-});
+document.addEventListener("DOMContentLoaded", () => showVideoControls());
 
 /* Utils */
 
@@ -34,9 +29,9 @@ function secondsToTimeCode(seconds) {
 }
 
 /* Custom controls */
-
-video.addEventListener("loadedmetadata", function () {
+video.addEventListener("loadedmetadata", () => {
   console.log("loadedmetadata");
+  console.log(video.duration + " " + video.currentTime);
   videoDuration.textContent = secondsToTimeCode(video.duration);
   videoCurrentTime.textContent = secondsToTimeCode(video.currentTime);
   videoProgressBar.style.transform = `scaleX(${
@@ -44,55 +39,50 @@ video.addEventListener("loadedmetadata", function () {
   })`;
 });
 
-playPauseButton.addEventListener("click", function (event) {
+playPauseButton.addEventListener("click", (event) => {
   event.stopPropagation();
-  if (video.paused) {
-    video.play();
-  } else {
-    video.pause();
-  }
+  if (video.paused) video.play();
+  else video.pause();
 });
 
-video.addEventListener("play", function () {
+video.addEventListener("play", () => {
   console.log("play");
   playPauseButton.classList.add("playing");
   hideVideoControls();
 });
 
-video.addEventListener("pause", function () {
+video.addEventListener("pause", () => {
   console.log("pause");
   playPauseButton.classList.remove("playing");
   showVideoControls();
 });
 
-video.addEventListener("ended", function () {
+video.addEventListener("ended", () => {
   console.log("ended");
   playPauseButton.classList.remove("playing");
   video.currentTime = 0;
   showVideoControls();
 });
 
-document.addEventListener("fullscreenchange", function () {
+document.addEventListener("fullscreenchange", () => {
   toggleFullscreenButton.classList.toggle("active", document.fullscreenElement);
 });
 
-video.addEventListener("timeupdate", function () {
+video.addEventListener("timeupdate", () => {
   console.log("timeupdate");
-  if (!videoControls.classList.contains("visible")) {
-    return;
-  }
+  if (!videoControls.classList.contains("visible")) return;
   videoCurrentTime.textContent = secondsToTimeCode(video.currentTime);
   videoProgressBar.style.transform = `scaleX(${
     video.currentTime / video.duration
   })`;
 });
 
-seekForwardButton.addEventListener("click", function (event) {
+seekForwardButton.addEventListener("click", (event) => {
   event.stopPropagation();
   seekForward();
 });
 
-seekBackwardButton.addEventListener("click", function (event) {
+seekBackwardButton.addEventListener("click", (event) => {
   event.stopPropagation();
   seekBackward();
 });
@@ -107,62 +97,52 @@ function seekBackward() {
   video.currentTime = Math.max(video.currentTime - skipTime, 0);
 }
 
-video.addEventListener("seeking", function () {
+video.addEventListener("seeking", () => {
   console.log("seeking");
   video.classList.add("seeking");
 });
 
-video.addEventListener("seeked", function () {
+video.addEventListener("seeked", () => {
   console.log("seeked");
-  setTimeout(function () {
-    video.classList.remove("seeking");
-  }, 200);
+  setTimeout(() => video.classList.remove("seeking"), 200);
 });
 
 /* Fullscreen */
 
-toggleFullscreenButton.addEventListener("click", function (event) {
+toggleFullscreenButton.addEventListener("click", (event) => {
   event.stopPropagation();
-  if (document.fullscreenElement) {
-    document.exitFullscreen();
-  } else {
+  if (document.fullscreenElement) document.exitFullscreen();
+  else {
     requestFullscreenVideo();
     lockScreenInLandscape();
   }
 });
 
 function requestFullscreenVideo() {
-  if (videoContainer.requestFullscreen) {
-    videoContainer.requestFullscreen();
-  } else {
-    video.webkitEnterFullscreen();
-  }
+  if (videoContainer.requestFullscreen) videoContainer.requestFullscreen();
+  else video.webkitEnterFullscreen();
 }
 
 if ("orientation" in screen) {
-  screen.orientation.addEventListener("change", function () {
+  screen.orientation.addEventListener("change", () => {
     // Let's automatically request fullscreen if user switches device in landscape mode.
-    if (screen.orientation.type.startsWith("landscape")) {
-      // Note: It may silently fail in browsers that don't allow requesting
-      // fullscreen from the orientation change event.
-      // https://github.com/whatwg/fullscreen/commit/e5e96a9da944babf0e246980559cd80a46a300ca
+    // Note: It may silently fail in browsers that don't allow requesting
+    // fullscreen from the orientation change event.
+    // https://github.com/whatwg/fullscreen/commit/e5e96a9da944babf0e246980559cd80a46a300ca
+    if (screen.orientation.type.startsWith("landscape"))
       requestFullscreenVideo();
-    } else if (document.fullscreenElement) {
-      document.exitFullscreen();
-    }
+    else if (document.fullscreenElement) document.exitFullscreen();
   });
 }
 
 function lockScreenInLandscape() {
-  if (!("orientation" in screen)) {
-    return;
-  }
+  if (!("orientation" in screen)) return;
 
   // Let's force landscape mode only if device is in portrait mode and can be held in one hand.
   if (
     matchMedia("(orientation: portrait) and (max-device-width: 768px)").matches
   ) {
-    screen.orientation.lock("landscape").then(function () {
+    screen.orientation.lock("landscape").then(() => {
       // When screen is locked in landscape while user holds device in
       // portrait, let's use the Device Orientation API to unlock screen only
       // when it is appropriate to create a perfect and seamless experience.
@@ -172,9 +152,7 @@ function lockScreenInLandscape() {
 }
 
 function listenToDeviceOrientationChanges() {
-  if (!("DeviceOrientationEvent" in window)) {
-    return;
-  }
+  if (!("DeviceOrientationEvent" in window)) return;
 
   var previousDeviceOrientation, currentDeviceOrientation;
   window.addEventListener(
@@ -204,11 +182,9 @@ function listenToDeviceOrientationChanges() {
 
 /* Background Playback */
 
-document.addEventListener("visibilitychange", function () {
+document.addEventListener("visibilitychange", () => {
   // Pause video when page is hidden.
-  if (document.hidden) {
-    video.pause();
-  }
+  if (document.hidden) video.pause();
 });
 
 if ("IntersectionObserver" in window) {
@@ -223,14 +199,12 @@ if ("IntersectionObserver" in window) {
   observer.observe(video);
 }
 
-muteButton.addEventListener("click", function () {
-  // Mute/unmute video on button click.
-  video.muted = !video.muted;
-});
+// Mute/unmute video on button click.
+muteButton.addEventListener("click", () => (video.muted = !video.muted));
 
-video.addEventListener("volumechange", function () {
-  muteButton.classList.toggle("active", video.muted);
-});
+video.addEventListener("volumechange", () =>
+  muteButton.classList.toggle("active", video.muted)
+);
 
 let playlist = getAwesomePlaylist();
 let index = 3;
@@ -259,9 +233,7 @@ function playVideoFromPlaylist() {
 }
 
 function setMediaSession() {
-  if (!("mediaSession" in navigator)) {
-    return;
-  }
+  if (!("mediaSession" in navigator)) return;
   let track = playlist[index];
   navigator.mediaSession.metadata = new MediaMetadata({
     title: track.title,
@@ -294,15 +266,12 @@ video.addEventListener(
   { once: true }
 );
 
-video.addEventListener("loadedmetadata", function () {
+video.addEventListener("loadedmetadata", () => {
   let newTitle = playlist[index].title.replace(/"/g, "");
-  if (newTitle !== videoTitle.textContent) {
-    videoTitle.textContent = newTitle;
-  }
+  if (newTitle !== videoTitle.textContent) videoTitle.textContent = newTitle;
   let newArtist = playlist[index].artist;
-  if (newArtist !== videoArtist.textContent) {
+  if (newArtist !== videoArtist.textContent)
     videoArtist.textContent = newArtist;
-  }
 });
 
 /* Utils */
